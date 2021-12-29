@@ -1,43 +1,46 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import '../assets/TodoList.css';
 
 function TodoList() {
     const [name, setName] = useState('');
-    const [todo, setTodo] = useState(() => {
-        const localStoreTodo = JSON.parse(localStorage.getItem('todo'));
-        return localStoreTodo ?? [];
+    const [jobs, setJobs] = useState(() => {
+        const localStoreJobs = JSON.parse(localStorage.getItem('jobs'));
+        return localStoreJobs ?? [];
     });
     const [done, setDone] = useState(() => {
         const localStoreDone = JSON.parse(localStorage.getItem('done'));
         return localStoreDone ?? [];
     });
 
+
+    const id = useRef(0);
     const handleAdd = () => {
-        if (!todo.includes(name) && name !== ''){
-            setTodo(prev => {
-                const newTodo = [...prev, name];
+        if (name !== ''){
+            setJobs(prev => {
+                const newJobs = [...prev, { 'id': id.current, 'name': name}];
 
-                const jsonTodo = JSON.stringify(newTodo);
-                localStorage.setItem('todo', jsonTodo);
+                const jsonJobs = JSON.stringify(newJobs);
+                localStorage.setItem('jobs', jsonJobs);
 
-                return newTodo;
+                return newJobs;
             });
             setName('');
+            id.current++;
         }
     }
 
-    const handleDelete = (work) => {
-        setTodo(() => {
-            const newTodo = todo.filter(item => item !== work);
+    const handleDelete = (jobId, job) => {
+        setJobs(() => {
+            const newJobs = jobs.filter(item => item.id !== jobId);
 
-            const jsonTodo = JSON.stringify(newTodo);
-            localStorage.setItem('todo', jsonTodo);
+            const jsonJobs = JSON.stringify(newJobs);
+            localStorage.setItem('jobs', jsonJobs);
 
-            return newTodo;
+            return newJobs;
         });
 
         setDone(prevDone => {
-            const newDone = [...prevDone, work];
+            const newDone = [...prevDone, { 'id': jobId, 'name': job}];
 
             const jsonDone = JSON.stringify(newDone);
             localStorage.setItem('done', jsonDone);
@@ -46,9 +49,9 @@ function TodoList() {
         });
     }
 
-    const handleDeleteDone = (workDone) => {
+    const handleDeleteDone = (jobId) => {
         setDone(() => {
-            const newDone = done.filter(item => item !== workDone);
+            const newDone = done.filter(item => item.id !== jobId);
 
             const jsonDone = JSON.stringify(newDone);
             localStorage.setItem('done', jsonDone);
@@ -66,23 +69,23 @@ function TodoList() {
             <div className="list-container">
                 <ul className="todo-list list">
                     <li className="title">Công việc đang làm</li>
-                    { todo.length !== 0 ? todo.map((work, index) => {
+                    { jobs.length !== 0 ? jobs.map((job) => {
                         return (
-                            <li key={index} className="list-item">
-                                {work}
-                                <box-icon class="btn" name='trash' onClick={() => handleDelete(work)}></box-icon>
+                            <li key={job.id} className="list-item">
+                                {job.name}
+                                <box-icon class="btn" name='trash' onClick={() => handleDelete(job.id, job.name)}></box-icon>
                             </li>
                         )
                     }) : <li>Tuyệt vời! Không có công việc cần phải làm</li>}
                 </ul>
                 <ul className="done-list list">
                     <li className="title">Công việc đã hoàn thành</li>
-                    {done.length !== 0 ? done.map((workDone, index) => {
+                    {done.length !== 0 ? done.map((jobDone) => {
                         return (
-                            <li key={index} className="list-item">
-                                {workDone}
+                            <li key={jobDone.id} className="list-item">
+                                {jobDone.name}
                                 <box-icon class="btn" name='check'></box-icon>
-                                <box-icon class="btn" name='trash' onClick={() => handleDeleteDone(workDone)}></box-icon>
+                                <box-icon class="btn" name='trash' onClick={() => handleDeleteDone(jobDone.id)}></box-icon>
                             </li>
                         )
                     }) : <li>Chưa hoàn thành công việc nào</li>}
